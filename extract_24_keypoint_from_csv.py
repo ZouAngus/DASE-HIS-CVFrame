@@ -96,8 +96,22 @@ def extract_3d_points_from_csv(input_path: str, output_path: str, total_frames: 
 
 
 if __name__ == "__main__":
-    input_csv = "./Trove_15.csv"
-    output_csv = "./trove_15_3d_points_out.csv"
-    extract_3d_points_from_csv(input_csv, output_csv, offset=4)
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Extract 24-joint 3D keypoints from an OptiTrack CSV file.")
+    parser.add_argument("-input_csv",   required=False, default="./Trove_15.csv",            help="Path to the input OptiTrack CSV file")
+    parser.add_argument("-output_csv",  required=False, default="./trove_15_3d_points_out.csv", help="Path to save the output CSV file")
+    parser.add_argument("-total_frames",required=False, default=-1,   type=int, help="Number of frames to extract (-1 = all)")
+    parser.add_argument("-skiprows",    required=False, default=1,    type=int, help="Number of header rows to skip (default: 1)")
+    parser.add_argument("-offset",      required=False, default=4,    type=int, help="Frame offset into the CSV (default: 4)")
+    args = parser.parse_args()
+
+    extract_3d_points_from_csv(
+        input_path=args.input_csv,
+        output_path=args.output_csv,
+        total_frames=args.total_frames,
+        skiprows=args.skiprows,
+        offset=args.offset,
+    )
 
 

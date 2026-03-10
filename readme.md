@@ -15,6 +15,7 @@ pip install PyQt5 opencv-python numpy pandas tqdm
 ```
 
 ### Running the App
+make sure you modify the path in
 ```bash
 cd CVFrame2-v3
 python main.py
@@ -22,23 +23,67 @@ python main.py
 
 ---
 
+## Building a Standalone Executable
+
+You can package CVFrame2 into a single executable (no Python installation needed on the target machine).
+
+### 1. Install PyInstaller
+```bash
+pip install pyinstaller
+```
+
+### 2. Run the build script
+```bash
+python build/build.py
+```
+
+This will:
+- Clean any previous `build/` and `dist/` folders
+- Run PyInstaller using `CVFrame2.spec`
+- Output the executable to `dist/`
+
+### Output locations
+| Platform | Output |
+|----------|--------|
+| Windows  | `dist/CVFrame2.exe` |
+| macOS    | `dist/CVFrame2.app` |
+
+### Notes
+- The `archive/` folder (default camera JSONs) is automatically bundled into the executable.
+- On **macOS**, the `.app` bundle can be dragged into `/Applications` like any normal app.
+- On **Windows**, you can distribute `dist/CVFrame2.exe` as a single self-contained file.
+- If you add new data files (e.g., additional JSON configs) that must ship with the app, add them to the `datas` list in `CVFrame2.spec`:
+  ```python
+  datas=[
+      ('archive', 'archive'),
+      ('your_folder', 'your_folder'),  # add here
+  ],
+  ```
+- To add a custom app icon, place a `.ico` file (Windows) or `.icns` file (macOS) in the project root and set the `icon=` field in `CVFrame2.spec`.
+
+---
+
 ## Project Structure
 
 ```
 CVFrame2-v3/
- main.py                         # Entry point  launches the viewer window
- projection_window2.py           # Main UI and all projection/display logic
- video_player.py                 # Frame-by-frame video reading and caching
- black_video_player.py           # Virtual black background video player
- points3d_cache.py               # 3D point cloud data caching
- extract_24_keypoint_from_csv.py # Converts raw OptiTrack CSV to (T, 24, 3) array
- flip_video.py                   # Utility to horizontally flip video files in-place
- archive/                        # Default fallback camera parameter JSONs
+ main.py                              # Entry point  launches the viewer window
+ extract_24_keypoint_from_csv.py      # Independantly Converts raw OptiTrack CSV to (T, 24, 3) array
+ flip_video.py                        # Independant utility to horizontally flip video files in-place
+ tools/                               # All module source files
+    projection_window2.py             # Main UI and all projection/display logic
+    video_player.py                   # Frame-by-frame video reading and caching
+    black_video_player.py             # Virtual black background video player
+    points3d_cache.py                 # 3D point cloud data caching
+ build/                               # Build scripts
+    build.py                          # One-click build script
+    CVFrame2.spec                     # PyInstaller spec (Windows .exe / macOS .app)
+ archive/                             # Default fallback camera parameter JSONs
     intrinsic_left.json
     intrinsic_middle.json
     extrinsics_left.json
     extrinsics_middle.json
- data/                           # Per-session 3D point data
+ data/                                # Per-session 3D point data
      sword_02/
         Sword_02.csv
      trove_15/
@@ -49,24 +94,25 @@ CVFrame2-v3/
 
 ## Preparing 3D Point Data
 
-Raw motion capture CSVs from OptiTrack must be converted to a `(T, J, 3)` array before loading into the viewer.
+> ⚠️ **Required step before running `main.py`:** Raw OptiTrack CSV files cannot be loaded directly into the viewer. They must first be converted into a `(T, 24, 3)` shaped array using `extract_24_keypoint_from_csv.py`. Only the resulting `.csv` (or `.npy`) output file should be loaded into the viewer.
 
-Use `extract_24_keypoint_from_csv.py`:
-
-```python
-# Edit these values inside the script and run it
-INPUT_CSV    = r"data/sword_02/Sword_02.csv"
-OUTPUT_PATH  = r"sword_02_3d_points_out.csv"   # or .npy
-TOTAL_FRAMES = -1   # -1 = all frames
-SKIP_ROWS    = 1
-OFFSET       = 0
-```
+Use `extract_24_keypoint_from_csv.py` from the command line:
 
 ```bash
-python extract_24_keypoint_from_csv.py
+python extract_24_keypoint_from_csv.py -input_csv path/to/raw.csv -output_csv path/to/output.csv
 ```
 
-Output format: `(T, 24, 3)`  T frames, 24 joints, XYZ per joint.
+All arguments:
+
+| Argument | Default | Description |
+|----------|---------|-------------|
+| `-input_csv` | `./Trove_15.csv` | Path to the raw OptiTrack CSV |
+| `-output_csv` | `./trove_15_3d_points_out.csv` | Path to save the converted output |
+| `-total_frames` | `-1` (all) | Limit number of frames to extract |
+| `-skiprows` | `1` | Header rows to skip |
+| `-offset` | `4` | Frame offset into the CSV |
+
+Output format: `(T, 24, 3)` — T frames, 24 joints, XYZ per joint.
 
 ---
 
@@ -143,21 +189,21 @@ Use the **Frame Offset** spinbox to shift the 3D data forward or backward in tim
 
 ## Utilities
 
-### flip_video.py  Horizontally Flip a Video In-Place
+### flip_video.py — Horizontally Flip a Video In-Place
 
 Useful when your recording camera is physically mirrored.
 
+From the terminal (one or more files):
+```bash
+python flip_video.py -input video1.mp4 video2.mp4
+```
+
+For IDE use, edit the `IDE_INPUT_FILES` list directly inside the script:
 ```python
-# Edit inside the script for IDE use:
-INPUT_FILES = [
+IDE_INPUT_FILES = [
     r"C:\path\to\video1.mp4",
     r"C:\path\to\video2.mp4",
 ]
-```
-
-Or from the terminal:
-```bash
-python flip_video.py video1.mp4 video2.mp4
 ```
 
 The original file is overwritten with the flipped version.

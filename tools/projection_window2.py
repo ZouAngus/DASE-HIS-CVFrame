@@ -4,6 +4,9 @@ import json
 import cv2
 import numpy as np
 import pandas as pd
+
+# Project root is one level up from this file (tools/)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QProgressDialog,
     QFileDialog, QSlider, QSpinBox, QApplication, QMessageBox, QLineEdit, QGridLayout, QSizePolicy, QInputDialog, QMenuBar, QListWidget, QListWidgetItem, QCheckBox
@@ -1036,14 +1039,14 @@ class ProjectionWindow2(QMainWindow):
     def update_camera_parameters(self):
         """更新相机内外参数 - 使用预设的绝对路径"""
         # 预设的绝对路径，可以根据需要修改
-        intrinsics_path = "data/intrinsic_middle.json"
-        extrinsics_path = "data/extrinsics_middle.json"
+        intrinsics_path = os.path.join(PROJECT_ROOT, "data", "intrinsic_middle.json")
+        extrinsics_path = os.path.join(PROJECT_ROOT, "data", "extrinsics_middle.json")
 
         # Fallback to archive/ if data/ JSONs are not present in this workspace.
         if not os.path.exists(intrinsics_path):
-            intrinsics_path = "archive/intrinsic_middle.json"
+            intrinsics_path = os.path.join(PROJECT_ROOT, "archive", "intrinsic_middle.json")
         if not os.path.exists(extrinsics_path):
-            extrinsics_path = "archive/extrinsics_middle.json"
+            extrinsics_path = os.path.join(PROJECT_ROOT, "archive", "extrinsics_middle.json")
         
         # 加载内参
         if os.path.exists(intrinsics_path):
@@ -1090,14 +1093,14 @@ class ProjectionWindow2(QMainWindow):
     
     def update_camera_parameters_left(self):
         """切換到left視角的相機內外參數"""
-        intrinsics_path = "data/intrinsic_left.json"
-        extrinsics_path = "data/extrinsics_left.json"
+        intrinsics_path = os.path.join(PROJECT_ROOT, "data", "intrinsic_left.json")
+        extrinsics_path = os.path.join(PROJECT_ROOT, "data", "extrinsics_left.json")
 
         # Fallback to archive/ if data/ JSONs are not present in this workspace.
         if not os.path.exists(intrinsics_path):
-            intrinsics_path = "archive/intrinsic_left.json"
+            intrinsics_path = os.path.join(PROJECT_ROOT, "archive", "intrinsic_left.json")
         if not os.path.exists(extrinsics_path):
-            extrinsics_path = "archive/extrinsics_left.json"
+            extrinsics_path = os.path.join(PROJECT_ROOT, "archive", "extrinsics_left.json")
         # 加载内参
         if os.path.exists(intrinsics_path):
             try:

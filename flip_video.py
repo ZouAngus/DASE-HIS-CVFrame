@@ -44,22 +44,34 @@ def flip_video_horizontally(input_path: str):
 
 
 if __name__ == "__main__":
+    import argparse
+
     # ── Edit these paths directly when running from the IDE ────────────────
-    INPUT_FILES = [
+    IDE_INPUT_FILES = [
         r"",
         # r"C:\path\to\another_video.mp4",
     ]
     # ───────────────────────────────────────────────────────────────────────
 
-    # If command-line arguments are provided, they take priority over INPUT_FILES
-    if len(sys.argv) >= 2:
-        INPUT_FILES = sys.argv[1:]
+    parser = argparse.ArgumentParser(
+        description="Horizontally flip one or more video files in-place."
+    )
+    parser.add_argument(
+        "-input", "-i",
+        nargs="+",
+        metavar="VIDEO",
+        help="One or more video file paths to flip.",
+    )
+    args = parser.parse_args()
 
-    INPUT_FILES = [f for f in INPUT_FILES if f.strip()]
+    # CLI args take priority; fall back to IDE list
+    if args.input:
+        INPUT_FILES = args.input
+    else:
+        INPUT_FILES = [f for f in IDE_INPUT_FILES if f.strip()]
 
     if not INPUT_FILES:
-        print("Usage: python flip_video.py <video1> [video2] ...")
-        print("  Or set INPUT_FILES directly in the script.")
+        parser.print_help()
         sys.exit(1)
 
     for i, path in enumerate(INPUT_FILES):
