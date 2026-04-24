@@ -99,7 +99,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Extract 24-joint 3D keypoints from an OptiTrack CSV file.")
-    parser.add_argument("-input_csv",   required=False, default="./Trove_15.csv",            help="Path to the input OptiTrack CSV file")
+    parser.add_argument("-input_csv",   required=False, default="./travel_15.csv",            help="Path to the input OptiTrack CSV file")
     parser.add_argument("-output_csv",  required=False, default="./trove_15_3d_points_out.csv", help="Path to save the output CSV file")
     parser.add_argument("-total_frames",required=False, default=-1,   type=int, help="Number of frames to extract (-1 = all)")
     parser.add_argument("-skiprows",    required=False, default=1,    type=int, help="Number of header rows to skip (default: 1)")
